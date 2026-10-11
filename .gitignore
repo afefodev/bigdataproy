@@ -21,3 +21,4 @@ derby.log
 /*.docx
 
 .DS_Store
+logs/
