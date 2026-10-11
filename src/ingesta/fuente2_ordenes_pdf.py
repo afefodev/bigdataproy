@@ -69,6 +69,14 @@ def bajar(url: str, destino: Path, pausa: float) -> dict:
     return res
 
 
+def guardar_manifiesto(path: Path, previo: dict, filas: list[dict]) -> None:
+    """El manifiesto conserva TODO lo descargado alguna vez (zona cruda
+    inmutable: ningún archivo queda huérfano), actualizado con esta corrida."""
+    actual = {(f["tipo_documento"], f["orden_electronica"]): f for f in filas}
+    todo = {**previo, **actual}
+    write_csv_atomic(path, sorted(todo.values(), key=lambda f: (f["tipo_documento"], f["orden_electronica"])), CAMPOS)
+
+
 def main() -> dict:
     cfg = load_config()
     src = cfg["sources"][FUENTE]
@@ -83,6 +91,11 @@ def main() -> dict:
     cols = ["orden_electronica", "anio", "mes", "url_orden_generada", "url_orden_digitalizada", "url_documento_estado"]
     mpt = proc.to_table(columns=cols, filter=ds.field("es_mpt") == True).to_pylist()  # noqa: E712
     con_doc = proc.to_table(columns=cols, filter=ds.field("flag_documento_estado") == True).to_pylist()  # noqa: E712
+    # Orden fijo antes de muestrear: el orden de filas de un Parquet no está
+    # garantizado y sin esto la "misma" semilla daba otra muestra (detectado al
+    # relanzar el pipeline completo).
+    mpt.sort(key=lambda o: o["orden_electronica"])
+    con_doc.sort(key=lambda o: o["orden_electronica"])
     rnd = random.Random(SEMILLA)
     tareas = [("generada", o, o["url_orden_generada"]) for o in mpt]
     tareas += [("digitalizada", o, o["url_orden_digitalizada"])
@@ -106,10 +119,9 @@ def main() -> dict:
                       "mes": o["mes"], "url": url, **res, "ruta_relativa": rel if res["es_pdf"] else "",
                       "fecha_descarga_utc": datetime.now(timezone.utc).isoformat(timespec="seconds")})
         if i % 50 == 0 or i == len(tareas):
-            write_csv_atomic(manifest_path, filas + [v for k, v in previo.items()
-                                                     if k not in {(f["tipo_documento"], f["orden_electronica"]) for f in filas}], CAMPOS)
+            guardar_manifiesto(manifest_path, previo, filas)
             log.info("%d/%d (%.0f s)", i, len(tareas), time.perf_counter() - t0)
-    write_csv_atomic(manifest_path, filas, CAMPOS)
+    guardar_manifiesto(manifest_path, previo, filas)
 
     resumen = {}
     for tipo in ("generada", "digitalizada", "documento_estado"):

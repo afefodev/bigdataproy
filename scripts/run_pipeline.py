@@ -35,6 +35,7 @@ ETAPAS = [
     ("ingesta_f2_ordenes_pdf", "src.ingesta.fuente2_ordenes_pdf", "Fuente 2b: PDF de órdenes MPT y verificación de enlaces"),
     ("extraccion_ordenes_pdf", "src.pdf.extraer_ordenes", "Fuente 2b: detalle por ítem desde los PDF"),
     ("extraccion_resoluciones", "src.pdf.extraer_resoluciones", "Fuente 2a: texto (OCR) y campos de las resoluciones"),
+    ("verificacion_digitalizadas", "src.pdf.verificar_digitalizadas", "Fuente 2b: OCR de la muestra de órdenes digitalizadas"),
     ("integracion", "src.integracion.integrar_fuentes", "Integración CSV ⟷ PDF ⟷ resoluciones"),
     ("consumo", "src.consumo.construir_consumo", "Capa de consumo con seudonimización"),
 ]

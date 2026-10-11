@@ -53,9 +53,9 @@ repositorio; aquí se incluyen solo los fragmentos que sustentan las decisiones.
 | Fecha de obtención | 11/10/2026 (`raw/ordenes_pdf/_manifiesto.csv`) |
 | Licencia o condiciones de uso | Documentos públicos enlazados por un dataset ODC-BY. Contienen datos personales (representantes y servidores), que no se extraen (sección 3.8) |
 | Período cubierto y número de registros | Las 1 231 órdenes de la MPT (2022-01 a 2026-09): **1 231 PDF, 5 361 ítems** |
-| Tamaño en disco y formato | 93 721 580 bytes (93,7 MB), PDF con texto nativo; además, una muestra de 20 órdenes digitalizadas (2,5 MB, escaneadas) y 20 documentos de estado (4,3 MB) para verificación |
+| Tamaño en disco y formato | 93 721 580 bytes (93,7 MB), PDF con texto nativo; además, dos muestras aleatorias de verificación: 56 órdenes digitalizadas (7.7 MB, escaneadas) y 58 documentos de estado (12.9 MB) |
 
-**Volumen total ingerido:** 261,7 MB (CSV) + 23,1 MB + 93,7 MB + 6,8 MB (PDF) ≈ **385 MB**
+**Volumen total ingerido:** 261,7 MB (CSV) + 23,1 MB + 93,7 MB + 20.6 MB (PDF) ≈ **399 MB**
 y 511 782 registros estructurados. El requisito del curso (100 000 registros o 100 MB) se
 cumple solo con la Fuente 1. *Nota: el avance v4 estimaba ≈165 MB a partir de un solo
 archivo; la cifra medida es 261,7 MB.*
@@ -125,6 +125,12 @@ datalake/
 Convenciones: nombres de fuente en `snake_case`; particiones al estilo Hive (`anio=`,
 `mes=`), que Spark, DuckDB y Athena reconocen; versión del esquema en la ruta de la zona
 procesada (`v1`); archivos internos con prefijo `_`, que los lectores de Parquet ignoran.
+
+**Corrida completa de extremo a extremo** (`scripts/run_pipeline.py`, evidencia en
+`docs/evidencias/corrida_completa.log` y `corrida_completa_resumen.csv`): 9 etapas, todas OK,
+**364,4 s** en total, en una ejecución sobre datos ya descargados. Las ingestas de CSV y de
+PDF de órdenes solo verifican hashes (0,7 s cada una); la de resoluciones vuelve a recorrer
+las 67 páginas del catálogo de gob.pe (127,5 s); la extracción de 1 231 PDF toma 147,1 s.
 
 ## 3.3. Procesamiento y limpieza
 
@@ -288,7 +294,8 @@ a la salida.
 | Fecha de formalización del CSV = la del PDF | 1 231 / 1 231 |
 | cantidad × precio unitario + IGV = importe (por ítem) | 5 361 / 5 361 ítems |
 | suma de los ítems = IMPORTE TOTAL del PDF | 1 231 / 1 231 |
-| Enlaces accesibles (generada / digitalizada / documento de estado) | 1 231/1 231, 20/20, 20/20 |
+| Enlaces accesibles (generada / digitalizada / documento de estado) | 1 231/1 231, 56/56, 58/58 (sin un solo fallo) |
+| Órdenes digitalizadas: OCR reconoce el TOTAL del CSV / el código de la orden | 54/56 / 5/56 (escaneo sin capa de texto; aporta firma y sello, no datos nuevos frente al PDF generado) |
 | Confianza media del OCR, cuerpo de la resolución (págs. 1–3) | 70,0 – 94,2 % según la resolución |
 | Confianza media del OCR, anexos tabulares | 27,6 – 56,25 % (inventarios de bienes en letra pequeña) |
 | Fecha de emisión reconocida por OCR | 4 / 5 resoluciones (la 184-2025 tiene la cabecera ilegible) |

@@ -1,0 +1,10 @@
+etapa,descripcion,estado,segundos
+ingesta_f1,Fuente 1: descarga de CSV mensuales a raw + manifiesto,OK,0.7
+limpieza_f1,"Fuente 1: limpieza, reglas de calidad, cuarentena y Parquet",OK,16.5
+ingesta_f2_resoluciones,Fuente 2a: catálogo gob.pe y PDF de resoluciones,OK,127.5
+ingesta_f2_ordenes_pdf,Fuente 2b: PDF de órdenes MPT y verificación de enlaces,OK,0.7
+extraccion_ordenes_pdf,Fuente 2b: detalle por ítem desde los PDF,OK,147.1
+extraccion_resoluciones,Fuente 2a: texto (OCR) y campos de las resoluciones,OK,5.2
+verificacion_digitalizadas,Fuente 2b: OCR de la muestra de órdenes digitalizadas,OK,50.9
+integracion,Integración CSV ⟷ PDF ⟷ resoluciones,OK,6.3
+consumo,Capa de consumo con seudonimización,OK,9.5

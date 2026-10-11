@@ -1,11 +1,11 @@
 {
- "ejecucion_utc": "2026-10-11T21:51:55+00:00",
+ "ejecucion_utc": "2026-10-11T22:37:02+00:00",
  "archivos": 57,
  "registros_leidos": 511782,
  "registros_validos": 511782,
  "registros_cuarentena": 0,
  "cuadra": true,
- "segundos": 15.28,
+ "segundos": 14.3,
  "processed": "/Users/raean/Desktop/Proyectos/bigdata/datalake/processed/ordenes_compra/v1",
  "cuarentena": "/Users/raean/Desktop/Proyectos/bigdata/datalake/cuarentena/ordenes_compra"
 }

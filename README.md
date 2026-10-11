@@ -70,6 +70,7 @@ Orden de las etapas (`scripts/run_pipeline.py`):
 | 4 | ingesta_f2_ordenes_pdf | `src/ingesta/fuente2_ordenes_pdf.py` | `raw/ordenes_pdf/` |
 | 5 | extraccion_ordenes_pdf | `src/pdf/extraer_ordenes.py` | `processed/items_orden_mpt/`, `processed/ordenes_pdf_cabecera/` |
 | 6 | extraccion_resoluciones | `src/pdf/extraer_resoluciones.py` | `processed/resoluciones_mpt/` |
+| 6b | verificacion_digitalizadas | `src/pdf/verificar_digitalizadas.py` | `docs/evidencias/verificacion_digitalizadas.csv` |
 | 7 | integracion | `src/integracion/integrar_fuentes.py` | `processed/ordenes_mpt_integradas/` |
 | 8 | consumo | `src/consumo/construir_consumo.py` | `consumo/*` (sin datos personales) |
 
