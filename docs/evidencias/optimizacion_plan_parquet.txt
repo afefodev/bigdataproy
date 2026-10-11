@@ -1,0 +1,7 @@
+AdaptiveSparkPlan isFinalPlan=false
++- ObjectHashAggregate(keys=[acuerdo_marco#1184], functions=[count(1), sum(total#1194), percentile_approx(total#1194, 0.5, 10000, 0, 0)], output=[acuerdo_marco#1184, ordenes#1291L, monto#1293, mediana#1294])
+   +- Exchange hashpartitioning(acuerdo_marco#1184, 16), ENSURE_REQUIREMENTS, [plan_id=1287]
+      +- ObjectHashAggregate(keys=[acuerdo_marco#1184], functions=[partial_count(1), partial_sum(total#1194), partial_percentile_approx(total#1194, 0.5, 10000, 0, 0)], output=[acuerdo_marco#1184, count#1304L, sum#1305, isEmpty#1306, buf#1307])
+         +- Project [acuerdo_marco#1184, total#1194]
+            +- Filter (isnotnull(ruc_entidad#1177) AND (ruc_entidad#1177 = 20175639391))
+               +- FileScan parquet [ruc_entidad#1177,acuerdo_marco#1184,total#1194,anio#1209,mes#1210] Batched: true, DataFilters: [isnotnull(ruc_entidad#1177), (ruc_entidad#1177 = 20175639391)], Format: Parquet, Location: InMemoryFileIndex(1 paths)[file:/Users/raean/Desktop/Proyectos/bigdata/datalake/processed/ordenes..., PartitionFilters: [isnotnull(anio#1209), (anio#1209 = 2025)], PushedFilters: [IsNotNull(ruc_entidad), EqualTo(ruc_entidad,20175639391)], ReadSchema: struct<ruc_entidad:string,acuerdo_marco:string,total:decimal(18,2)>

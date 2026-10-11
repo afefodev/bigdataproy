@@ -1,0 +1,4 @@
+# Tiempo del job completo de limpieza (src/limpieza/fuente1_limpieza.py) antes y después de O2
+# Extraído de logs/limpieza_fuente1.log (una corrida de cada versión, mismos 57 archivos)
+2026-10-11 16:08:17,516 | INFO    | limpieza.f1 | Leídos 511782 | válidos 511782 | cuarentena 0 | cuadra=True | 151.6 s
+2026-10-11 16:13:21,725 | INFO    | limpieza.f1 | Leídos 511782 | válidos 511782 | cuarentena 0 | cuadra=True | 17.3 s

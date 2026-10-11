@@ -1,0 +1,7 @@
+optimizacion,caso,repeticiones,mediana_s,min_s,max_s,aceleracion_x,carga_sistema_1min,bytes_leidos,poda_de_particiones_en_plan,mismo_resultado_que_antes,estrategia_en_plan
+O1,"O1-antes: CSV crudo (57 archivos, todas las columnas)",7,3.88,1.261,5.403,,17.5,261687822,,,
+O1,O1-después: Parquet particionado (poda anio=2025),7,0.509,0.219,1.122,7.62,17.5,8174458,True,True,
+O2,O2-antes: normalización inicial (regex + withColumn),7,13.02,10.945,18.577,,18.8,,,,
+O2,O2-después: normalización optimizada (btrim + select),7,5.623,4.726,8.149,2.32,18.8,,,True,
+O3,O3-antes: sort-merge join (shuffle de ambas tablas),7,0.592,0.414,0.77,,17.9,,,,SortMergeJoin
+O3,O3-después: broadcast join (tabla de 58 filas),7,0.214,0.143,0.343,2.77,17.9,,,,BroadcastHashJoin
