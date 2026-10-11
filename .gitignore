@@ -1,0 +1,23 @@
+# Data lake: datos reales y derivados NO van al repo (volumen y datos personales).
+# Se reconstruye por completo ejecutando el pipeline desde la zona cruda.
+datalake/
+
+# Secretos y configuración local (la sal del hash vive en .env)
+.env
+config/config.yaml
+
+# Entorno de Python
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Artefactos de Spark
+spark-warehouse/
+metastore_db/
+derby.log
+
+# Documentos de trabajo del curso (se entregan por el aula virtual, no por Git)
+/*.docx
+
+.DS_Store

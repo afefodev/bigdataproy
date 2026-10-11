@@ -1,0 +1,48 @@
+# Configuración del pipeline PrecioJusto.
+# Copiar a config/config.yaml (ignorado por Git) y ajustar a cada máquina.
+# POR QUÉ un archivo aparte: las rutas y parámetros cambian entre equipos
+# (local, clúster del curso, nube) y no deben obligar a tocar el código.
+
+# Raíz del data lake. Cambiar de almacenamiento = cambiar SOLO esta línea:
+#   local : "datalake"  (relativo a la raíz del repo) o una ruta absoluta
+#   HDFS  : "hdfs://namenode:9000/datalake"
+#   S3    : "s3a://mi-bucket/datalake"
+base_path: "datalake"
+
+# Zonas del data lake (contratos entre capas, ver sección 2.1 del informe).
+zones:
+  raw: "raw"                # archivos tal como se descargan; inmutable
+  cuarentena: "cuarentena"  # registros rechazados con su motivo
+  processed: "processed"    # Parquet particionado por anio/mes, esquema versionado
+  consumo: "consumo"        # tablas para el tablero / modelo (filtro MPT aquí)
+  escalabilidad: "escalabilidad"  # réplicas x10/x100 (3.7); NUNCA alimenta el análisis
+
+spark:
+  master: "local[*]"        # en el clúster del curso: "yarn"
+  app_name: "preciojusto"
+  driver_memory: "6g"
+  shuffle_partitions: 16    # el valor por defecto (200) es excesivo para ~165 MB
+
+sources:
+  ordenes_compra:
+    # Fuente 1 — PERÚ COMPRAS, datosabiertos.gob.pe
+    dataset_id: "30932ab9-2ee8-44d6-98c3-64628397ebc9"
+    portal: "https://www.datosabiertos.gob.pe"
+    desde: "2022-01"
+    hasta: "2026-09"
+    timeout_s: 60
+    reintentos: 3
+  resoluciones_mpt:
+    # Fuente 2 — Portal de Transparencia de la MPT
+    portal: "https://www.munitrujillo.gob.pe"
+    max_documentos: 50
+
+# Entidad cliente (se completa en el Paso 2 tras inspeccionar el CSV real).
+entidad_cliente:
+  nombre: "MUNICIPALIDAD PROVINCIAL DE TRUJILLO"
+  ruc: ""   # PENDIENTE — verificar en los datos
+
+seguridad:
+  # Nombre de la variable de entorno que contiene la sal del hash.
+  # La sal NUNCA se escribe en este archivo ni en el repositorio.
+  salt_env_var: "PRECIOJUSTO_SALT"
