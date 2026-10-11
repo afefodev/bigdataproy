@@ -57,3 +57,10 @@ def write_text_atomic(spark: SparkSession, final_path: str, content: str) -> Non
     if fs.exists(final):
         fs.delete(final, False)
     fs.rename(tmp, final)
+
+
+def borrar_ruta(spark: SparkSession, path: str) -> None:
+    """Elimina un directorio intermedio (staging) en cualquier sistema de archivos."""
+    fs, hpath, _ = _fs_and_path(spark, path)
+    if fs.exists(hpath):
+        fs.delete(hpath, True)

@@ -35,7 +35,7 @@ from pyspark.sql.types import StringType, StructField, StructType
 
 from src.calidad.motor_reglas import aplicar_reglas, cargar_reglas, completitud, resumen_reglas, sello_tiempo
 from src.common.io_utils import get_logger, read_csv_dicts, write_csv_atomic
-from src.common.spark_io import write_parquet_atomic, write_text_atomic
+from src.common.spark_io import borrar_ruta, write_parquet_atomic, write_text_atomic
 from src.config import REPO_ROOT, load_config, zone_path
 from src.spark_session import get_spark
 
@@ -274,7 +274,17 @@ def ejecutar(spark: SparkSession, cfg: dict, raw_root: Path, processed_out: str,
                                                          F.col("archivo_origen").desc())
     df = df.withColumn("_rn_orden", F.when(F.col("orden_electronica").isNull(), 1).otherwise(F.row_number().over(w)))
     df = derivar(df, cfg["entidad_cliente"]["ruc"])
-    df = aplicar_reglas(df, reglas).cache()
+    df = aplicar_reglas(df, reglas)
+
+    # Staging: el resultado evaluado se escribe UNA vez en Parquet y todo lo
+    # demás (resúmenes de calidad, válidos, cuarentena) se lee de ahí.
+    # POR QUÉ no .cache(): con la réplica x100 (51 M de filas) el caché no cabe
+    # en memoria y Spark lo derramaría a disco sin control; el staging ocupa
+    # un espacio conocido (Parquet comprimido), se lee por columnas y permite
+    # relanzar sin volver a parsear los CSV.
+    staging = processed_out.rstrip("/") + ".__staging"
+    write_parquet_atomic(df, staging)
+    df = spark.read.parquet(staging)
 
     total = df.count()
     res_reglas = resumen_reglas(df, reglas, total)
@@ -298,7 +308,7 @@ def ejecutar(spark: SparkSession, cfg: dict, raw_root: Path, processed_out: str,
     n_val = spark.read.parquet(processed_out).count()
     n_cua = spark.read.parquet(cuarentena_out).count()
     comp_despues = completitud(spark.read.parquet(processed_out), reglas_cfg["campos_criticos"], "salida (processed)")
-    df.unpersist()
+    borrar_ruta(spark, staging)
 
     metricas = {"ejecucion_utc": sello_tiempo(), "archivos": len(manifest), "registros_leidos": total,
                 "registros_validos": n_val, "registros_cuarentena": n_cua,

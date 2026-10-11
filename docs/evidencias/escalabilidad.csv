@@ -1,0 +1,4 @@
+factor,estado,archivos_csv,registros_leidos,registros_validos,registros_cuarentena,gb_entrada_csv,gb_salida_parquet,seg_limpieza_calidad,seg_consumo,seg_total_proceso,tiempo_relativo_vs_x1,eficiencia_escalado,registros_por_segundo,pico_memoria_mb,carga_sistema_media,ordenes_consumo,pn_en_claro
+1,OK,57,511782,511782,0,0.262,0.044,16.94,5.71,25.02,1.0,1.0,20455,2689,5.1,511782,0
+10,OK,570,5117820,5117820,0,2.64,0.229,135.68,27.88,166.67,6.66,1.5,30706,5242,12.3,5117820,0
+100,OK,5700,51178200,51178200,0,26.422,1.471,712.02,177.2,893.34,35.71,2.8,57289,4934,28.3,51178200,0
