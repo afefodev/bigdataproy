@@ -18,3 +18,5 @@ psutil==6.1.0
 pytesseract==0.3.13
 # PySpark 3.5 importa distutils (eliminado en Python 3.12); setuptools lo provee.
 setuptools==75.6.0
+# Gráficos del informe (scripts/figuras_informe.py)
+matplotlib==3.9.2
