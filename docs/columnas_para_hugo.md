@@ -9,14 +9,19 @@ Todo sale de datos reales (sin datos sintéticos) y se reconstruye con el pipeli
 |---|---|---|---|
 | **EDA y entrenamiento del modelo (recomendada)** | `datalake/consumo/ordenes_nacional/` | 511 782 | Todas las entidades. Proveedores persona natural **seudonimizados**. Sin enlaces a PDF. Particionada por `anio` |
 | Órdenes de la MPT (alerta / tablero) | `datalake/consumo/ordenes_mpt/` | 1 231 | Mismo esquema, solo `es_mpt = true` |
-| Detalle por ítem de las órdenes MPT (precio unitario) | `datalake/consumo/items_orden_mpt/` | ver Paso 8 | Extraído de los PDF de cada orden |
+| Detalle por ítem de las órdenes MPT (**precio unitario**) | `datalake/consumo/items_orden_mpt/` | 5 361 | Extraído del PDF de cada orden; 130 productos, 1 579 códigos únicos |
+| Órdenes MPT integradas (CSV + PDF + resoluciones) | `datalake/consumo/ordenes_mpt_integradas/` | 1 231 | Una fila por orden con n.º de ítems, plazo de entrega, tipo de contratación y cruce con resoluciones |
+| Resoluciones de abastecimiento (resumen) | `datalake/consumo/resoluciones_mpt_resumen/` | 5 | Bajas de bienes 2024–2025; sin texto completo |
 | Zona procesada (uso interno) | `datalake/processed/ordenes_compra/v1/` | 511 782 | Contiene nombres y RUC de personas naturales: **no usar en notebooks ni capturas del informe** |
 
 Para obtener los datos en tu máquina (unos 4 minutos; la mayor parte es la descarga):
 
 ```bash
-.venv/bin/python -m scripts.run_pipeline --solo fuente1
+.venv/bin/python -m scripts.run_pipeline --solo fuente1   # solo Fuente 1 (lo mínimo para el EDA)
+.venv/bin/python -m scripts.run_pipeline                  # todo, incluidas las tablas de PDF (~30-40 min)
 ```
+
+O pídeme la carpeta `datalake/consumo/` (28 MB, sin datos personales) y la copias en tu repo.
 
 Lectura:
 
@@ -82,3 +87,27 @@ df = pd.read_parquet("datalake/consumo/ordenes_nacional")
 | Proveedores persona natural (registros / distintos) | 77 735 / 865 |
 
 Esquema versionado: `config/schemas/ordenes_compra.v1.json` (también copiado en `datalake/processed/ordenes_compra/v1/_esquema.json`).
+
+## 5. Tablas de la Fuente 2 (solo MPT)
+
+`items_orden_mpt` — una fila por ítem de cada orden de la MPT:
+
+| Columna | Tipo | Descripción |
+|---|---|---|
+| `orden_electronica` | string | Clave para unir con `ordenes_mpt` |
+| `nro_item` | int | Número de ítem dentro de la orden |
+| `producto` | string | Producto genérico (texto antes de " : "), p. ej. TONER, PLUMÓN, COMPUTADORA DE ESCRITORIO |
+| `descripcion` | string | Ficha-producto completa (incluye marca y modelo) |
+| `codigo_unico` | string | Código del producto en el catálogo: compara precios del **mismo** producto |
+| `cantidad` | double | Unidades (en entregas parciales, suma de todas las entregas) |
+| `precio_unitario_sin_igv` | double | Precio unitario en soles sin IGV |
+| `igv_item`, `importe_item` | double | IGV e importe del ítem (importe = cantidad × precio + IGV, verificado en el 100 %) |
+
+`ordenes_mpt_integradas` — `ordenes_mpt` más: `n_items`, `unidades_totales`, `productos_distintos`,
+`producto_principal`, `tipo_contratacion` (Individual/Paquete), `tipo_entrega`, `total_entregas`,
+`dias_plazo_entrega`, `expediente_siaf`, `total_cuadra_csv_pdf` (100 % true),
+`n_resoluciones_ventana` y `n_resoluciones_misma_familia` (cruce ±30 días con resoluciones de baja de bienes).
+
+Idea para el modelo: con `codigo_unico` puedes comparar el **precio unitario** de un mismo
+producto entre órdenes de la MPT a lo largo del tiempo (atípico de precio, no solo de monto).
+Solo existe para la MPT; el histórico nacional sigue teniendo únicamente montos por orden.
