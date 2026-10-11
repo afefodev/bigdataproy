@@ -1,0 +1,21 @@
+# Parámetros de la integración de fuentes (Paso 9, sección 3.3).
+# Declarados aparte del código para poder discutirlos y ajustarlos.
+
+# Ventana temporal entre la fecha de la resolución y la fecha de formalización
+# de la orden (propuesta del documento v4).
+ventana_dias: 30
+
+# Familias de bienes: palabras clave (mayúsculas, sin tildes) que, si aparecen en
+# el texto OCR de una resolución, indican que trata de bienes de ese acuerdo
+# marco. Permite un cruce temático: "se dio de baja X y luego se compró X".
+# Solo se listan las familias que existen en las compras de la MPT.
+familias:
+  "COMPUTADORAS DE ESCRITORIO, COMPUTADORAS PORTATILES Y ESCANERES": ["COMPUTADORA", "LAPTOP", "PORTATIL", "ESCANER", "CPU"]
+  "IMPRESORAS, CONSUMIBLES, REPUESTOS Y ACCESORIOS DE OFICINA": ["IMPRESORA", "TONER", "FOTOCOPIADORA", "MULTIFUNCIONAL"]
+  "MOBILIARIO EN GENERAL": ["SILLA", "ESCRITORIO", "ARMARIO", "ESTANTE", "MUEBLE", "MESA DE"]
+  "LLANTAS, NEUMATICOS Y ACCESORIOS": ["LLANTA", "NEUMATICO"]
+  "EQUIPOS DE AIRE ACONDICIONADO, SIMILARES Y ACCESORIOS": ["AIRE ACONDICIONADO"]
+  "EQUIPOS MULTIMEDIA Y ACCESORIOS": ["PROYECTOR", "TELEVISOR", "MULTIMEDIA"]
+  "BATERIAS, PILAS Y ACCESORIOS": ["BATERIA"]
+  "MAQUINAS, EQUIPOS Y HERRAMIENTAS PARA JARDINERIA, SILVICULTURA Y AGRICULTURA": ["DESBROZADORA", "MOTOSIERRA", "PODADORA"]
+  "LUMINARIAS, MATERIALES ELECTRICOS, Y CABLES ELECTRICOS": ["LUMINARIA", "REFLECTOR"]
