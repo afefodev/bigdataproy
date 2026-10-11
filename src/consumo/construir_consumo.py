@@ -24,7 +24,7 @@ from pyspark.sql import functions as F
 from src.common.io_utils import get_logger
 from src.common.spark_io import write_parquet_atomic
 from src.config import REPO_ROOT, load_config, zone_path
-from src.seguridad.seudonimizacion import obtener_clave, seudonimizar_proveedor
+from src.seguridad.seudonimizacion import obtener_clave, seudonimizar_proveedor, udf_seudonimo
 from src.spark_session import get_spark
 
 COLUMNAS_CONSUMO = [
@@ -37,6 +37,36 @@ COLUMNAS_CONSUMO = [
 ]
 
 
+def construir_ordenes(spark, proc_path: str, consumo_root: str, clave: bytes, archivos_por_anio: int = 5) -> dict:
+    """Escribe consumo/ordenes_nacional y consumo/ordenes_mpt y verifica la
+    seudonimización. Parametrizada por rutas para reutilizarla en la prueba
+    de escalabilidad (3.7) sin tocar la zona de consumo real."""
+    proc = spark.read.parquet(proc_path)
+    ruc_pub, nom_pub = seudonimizar_proveedor("ruc_proveedor", "proveedor", clave)
+    # Ambas columnas se calculan en UNA proyección a partir del RUC original.
+    # (Con dos withColumn seguidos, el segundo vería el RUC ya seudonimizado
+    # y dejaría el nombre en claro: error detectado y corregido en pruebas.)
+    reemplazos = {"ruc_proveedor": ruc_pub, "proveedor": nom_pub}
+    nacional = proc.select(*[reemplazos.get(c, F.col(c)).alias(c) for c in COLUMNAS_CONSUMO])
+    write_parquet_atomic(nacional, f"{consumo_root}/ordenes_nacional", partition_by=["anio"], num_files=archivos_por_anio)
+    nac = spark.read.parquet(f"{consumo_root}/ordenes_nacional")
+    write_parquet_atomic(nac.where(F.col("es_mpt")), f"{consumo_root}/ordenes_mpt", num_files=1)
+
+    # Verificación de la seudonimización: ningún RUC ni nombre de persona natural en claro.
+    fugas = nac.where(F.col("ruc_proveedor").rlike("^(10|15|17)[0-9]{9}$")
+                      | ((F.col("tipo_persona_proveedor") == "NATURAL")
+                         & ~F.col("proveedor").startswith("PERSONA NATURAL PN-"))).count()
+    n_tokens = nac.where(F.col("tipo_persona_proveedor") == "NATURAL").select("ruc_proveedor").distinct().count()
+    n_ruc_pn = proc.where(F.col("tipo_persona_proveedor") == "NATURAL").select("ruc_proveedor").distinct().count()
+    res = {"ordenes_nacional": nac.count(), "ordenes_mpt": spark.read.parquet(f"{consumo_root}/ordenes_mpt").count(),
+           "registros_persona_natural": nac.where(F.col("tipo_persona_proveedor") == "NATURAL").count(),
+           "ruc_pn_distintos": n_ruc_pn, "seudonimos_distintos": n_tokens,
+           "colisiones": n_ruc_pn - n_tokens, "pn_en_claro": fugas}
+    if fugas:
+        raise RuntimeError(f"Seudonimización incompleta: {fugas} registros de persona natural en claro")
+    return res
+
+
 def main() -> dict:
     cfg = load_config()
     log = get_logger("consumo", REPO_ROOT / "logs" / "consumo.log")
@@ -44,42 +74,26 @@ def main() -> dict:
     spark = get_spark(cfg, "consumo")
     t0 = time.perf_counter()
     try:
-        proc = spark.read.parquet(zone_path(cfg, "processed", "ordenes_compra", "v1"))
-        ruc_pub, nom_pub = seudonimizar_proveedor("ruc_proveedor", "proveedor", clave)
-        # Ambas columnas se calculan en UNA proyección a partir del RUC original.
-        # (Con dos withColumn seguidos, el segundo vería el RUC ya seudonimizado
-        # y dejaría el nombre en claro: error detectado y corregido en pruebas.)
-        reemplazos = {"ruc_proveedor": ruc_pub, "proveedor": nom_pub}
-        nacional = proc.select(*[reemplazos.get(c, F.col(c)).alias(c) for c in COLUMNAS_CONSUMO])
-        write_parquet_atomic(nacional, zone_path(cfg, "consumo", "ordenes_nacional"), partition_by=["anio"], num_files=5)
-        nac = spark.read.parquet(zone_path(cfg, "consumo", "ordenes_nacional"))
-
-        mpt = nac.where(F.col("es_mpt"))
-        write_parquet_atomic(mpt, zone_path(cfg, "consumo", "ordenes_mpt"), num_files=1)
-
-        # Verificación de la seudonimización: ningún RUC 10/15/17 en claro.
-        fugas = nac.where(F.col("ruc_proveedor").rlike("^(10|15|17)[0-9]{9}$")
-                          | ((F.col("tipo_persona_proveedor") == "NATURAL")
-                             & ~F.col("proveedor").startswith("PERSONA NATURAL PN-"))).count()
-        n_pn = nac.where(F.col("tipo_persona_proveedor") == "NATURAL").count()
-        n_tokens = nac.where(F.col("tipo_persona_proveedor") == "NATURAL").select("ruc_proveedor").distinct().count()
-        n_ruc_pn = proc.where(F.col("tipo_persona_proveedor") == "NATURAL").select("ruc_proveedor").distinct().count()
-
-        res = {"ordenes_nacional": nac.count(), "ordenes_mpt": spark.read.parquet(zone_path(cfg, "consumo", "ordenes_mpt")).count(),
-               "registros_persona_natural": n_pn, "ruc_pn_distintos": n_ruc_pn, "seudonimos_distintos": n_tokens,
-               "colisiones": n_ruc_pn - n_tokens, "pn_en_claro": fugas}
-
-        # Detalle por ítem (Fuente 2b), si existe: también sin datos personales.
-        try:
-            items = spark.read.parquet(zone_path(cfg, "processed", "items_orden_mpt"))
-            write_parquet_atomic(items, zone_path(cfg, "consumo", "items_orden_mpt"), num_files=1)
-            res["items_orden_mpt"] = items.count()
-        except Exception:  # noqa: BLE001 — la Fuente 2b es opcional para esta etapa
-            log.info("items_orden_mpt aún no existe en processed; se omite")
-
+        res = construir_ordenes(spark, zone_path(cfg, "processed", "ordenes_compra", "v1"),
+                                zone_path(cfg, "consumo"), clave)
+        # Tablas de la Fuente 2 e integración, si ya se generaron (sin datos personales).
+        for tabla in ("items_orden_mpt", "ordenes_mpt_integradas", "resoluciones_mpt_resumen"):
+            try:
+                df = spark.read.parquet(zone_path(cfg, "processed", tabla))
+            except Exception:  # noqa: BLE001 — etapa opcional según el orden de ejecución
+                log.info("%s aún no existe en processed; se omite", tabla)
+                continue
+            if "ruc_proveedor" in df.columns:
+                # Toda tabla con RUC de proveedor pasa por la misma seudonimización.
+                es_pn = F.substring("ruc_proveedor", 1, 2).isin("10", "15", "17")
+                seud = udf_seudonimo(clave)(F.col("ruc_proveedor"))
+                df = df.withColumn("ruc_proveedor", F.when(es_pn, seud).otherwise(F.col("ruc_proveedor")))
+            write_parquet_atomic(df, zone_path(cfg, "consumo", tabla), num_files=1)
+            out = spark.read.parquet(zone_path(cfg, "consumo", tabla))
+            if "ruc_proveedor" in out.columns and out.where(F.col("ruc_proveedor").rlike("^(10|15|17)[0-9]{9}$")).count():
+                raise RuntimeError(f"RUC de persona natural en claro en consumo/{tabla}")
+            res[tabla] = out.count()
         res["segundos"] = round(time.perf_counter() - t0, 2)
-        if fugas:
-            raise RuntimeError(f"Seudonimización incompleta: {fugas} registros de persona natural en claro")
         log.info("RESUMEN consumo: %s", res)
         (REPO_ROOT / "docs" / "evidencias").mkdir(parents=True, exist_ok=True)
         (REPO_ROOT / "docs" / "evidencias" / "metricas_consumo.json").write_text(json.dumps(res, indent=1), encoding="utf-8")
