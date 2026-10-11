@@ -1,0 +1,118 @@
+# Reglas de calidad — Fuente 1 (órdenes de compra, Acuerdos Marco, bienes)
+#
+# POR QUÉ un archivo aparte del código: las reglas son una decisión de negocio
+# y de veracidad, no de programación. Declararlas aquí permite revisarlas,
+# discutirlas y cambiarlas sin tocar el job, y sobreviven a un cambio de motor
+# (Spark -> DuckDB/Polars), porque son expresiones SQL estándar.
+#
+# Cada regla describe la condición que debe CUMPLIR un registro válido.
+#   severidad: rechazo     -> el registro va a /cuarentena con el id de la regla
+#   severidad: advertencia -> el registro se conserva y se marca en `alertas_calidad`
+# Las expresiones se evalúan sobre las columnas ya tipadas por la limpieza.
+# Un resultado NULL de la expresión se trata como incumplimiento.
+
+version: 1
+reglas:
+  - id: R01_registro_bien_formado
+    descripcion: La fila tiene exactamente las 19 columnas del diccionario (no es un registro corrupto)
+    severidad: rechazo
+    expresion: "_corrupt_record IS NULL"
+
+  - id: R02_orden_presente
+    descripcion: El identificador de la orden (ORDEN_ELECTRÓNICA) no está vacío
+    severidad: rechazo
+    expresion: "orden_electronica IS NOT NULL"
+
+  - id: R03_orden_unica
+    descripcion: Cada orden aparece una sola vez (si se repite, se conserva la del corte más reciente)
+    severidad: rechazo
+    expresion: "_rn_orden = 1"
+
+  - id: R04_ruc_entidad_valido
+    descripcion: RUC de la entidad con 11 dígitos
+    severidad: rechazo
+    expresion: "ruc_entidad RLIKE '^[0-9]{11}$'"
+
+  - id: R05_ruc_proveedor_valido
+    descripcion: RUC del proveedor con 11 dígitos
+    severidad: rechazo
+    expresion: "ruc_proveedor RLIKE '^[0-9]{11}$'"
+
+  - id: R06_fecha_formalizacion_valida
+    descripcion: FECHA_FORMALIZACIÓN se pudo convertir a fecha en alguno de los formatos conocidos
+    severidad: rechazo
+    expresion: "fecha_formalizacion IS NOT NULL"
+
+  - id: R07_montos_numericos
+    descripcion: SUB_TOTAL, IGV y TOTAL son numéricos
+    severidad: rechazo
+    expresion: "sub_total IS NOT NULL AND igv IS NOT NULL AND total IS NOT NULL"
+
+  - id: R08_total_positivo
+    descripcion: TOTAL > 0 (una orden formalizada sin monto no es analizable)
+    severidad: rechazo
+    expresion: "total > 0"
+
+  - id: R09_total_cuadra
+    descripcion: TOTAL = SUB_TOTAL + IGV con tolerancia de 5 céntimos (redondeo)
+    severidad: rechazo
+    expresion: "abs(total - (sub_total + igv)) <= 0.05"
+
+  - id: R10_tipo_procedimiento_dominio
+    descripcion: TIPO_PROCEDIMIENTO pertenece al dominio del diccionario (Compra Ordinaria / Gran Compra)
+    severidad: rechazo
+    expresion: "tipo_procedimiento IN ('COMPRA ORDINARIA', 'GRAN COMPRA')"
+
+  - id: R11_acuerdo_marco_presente
+    descripcion: ACUERDO_MARCO no está vacío (es la categoría de comparación del modelo)
+    severidad: rechazo
+    expresion: "acuerdo_marco IS NOT NULL"
+
+  # ---- Advertencias: el dato es plausible pero conviene que el análisis lo sepa
+  - id: A01_estado_dominio
+    descripcion: El estado pertenece a los valores observados en 2022-2026
+    severidad: advertencia
+    expresion: "estado_orden IN ('ACEPTADA', 'PAGADA', 'RESUELTA', 'ORDEN DE COMPRA NULA', 'ACEPTADA C/ENTREGA PENDIENTE')"
+
+  - id: A02_tasa_igv_coherente
+    descripcion: IGV es 0 (exonerado) o 18 % del SUB_TOTAL (±0.5 pp)
+    severidad: advertencia
+    expresion: "igv = 0 OR abs(igv / sub_total - 0.18) <= 0.005"
+
+  - id: A03_total_minimo
+    descripcion: TOTAL de al menos S/ 1.00 (montos menores sugieren error de digitación)
+    severidad: advertencia
+    expresion: "total >= 1"
+
+  - id: A04_ultimo_estado_posterior
+    descripcion: FECHA_ÚLTIMO_ESTADO no es anterior a FECHA_FORMALIZACIÓN
+    severidad: advertencia
+    expresion: "fecha_ultimo_estado IS NULL OR fecha_ultimo_estado >= fecha_formalizacion"
+
+  - id: A05_estado_antes_del_corte
+    descripcion: FECHA_ÚLTIMO_ESTADO no es posterior a la fecha de corte del archivo (FECHA_PROCESO)
+    severidad: advertencia
+    expresion: "fecha_ultimo_estado IS NULL OR fecha_proceso IS NULL OR fecha_ultimo_estado <= fecha_proceso"
+
+  - id: A06_mes_coincide_archivo
+    descripcion: El mes de formalización coincide con el mes del archivo publicado
+    severidad: advertencia
+    expresion: "date_format(fecha_formalizacion, 'yyyy-MM') = periodo_archivo"
+
+# Campos críticos para la tabla de completitud (sección 3.4)
+campos_criticos:
+  - orden_electronica
+  - ruc_entidad
+  - entidad
+  - ruc_proveedor
+  - proveedor
+  - tipo_procedimiento
+  - acuerdo_marco
+  - estado_orden
+  - fecha_formalizacion
+  - fecha_ultimo_estado
+  - sub_total
+  - igv
+  - total
+  - url_orden_generada
+  - url_orden_digitalizada
