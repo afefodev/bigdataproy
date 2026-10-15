@@ -1,0 +1,208 @@
+{
+ "dataset": "ordenes_compra",
+ "version": "v1",
+ "particiones": [
+  "anio",
+  "mes"
+ ],
+ "clave": [
+  "orden_electronica"
+ ],
+ "columnas": [
+  {
+   "nombre": "orden_electronica",
+   "tipo": "string",
+   "nulable": true
+  },
+  {
+   "nombre": "fecha_formalizacion",
+   "tipo": "timestamp",
+   "nulable": true
+  },
+  {
+   "nombre": "fecha_formalizacion_dia",
+   "tipo": "date",
+   "nulable": true
+  },
+  {
+   "nombre": "fecha_ultimo_estado",
+   "tipo": "timestamp",
+   "nulable": true
+  },
+  {
+   "nombre": "fecha_proceso",
+   "tipo": "timestamp",
+   "nulable": true
+  },
+  {
+   "nombre": "ruc_entidad",
+   "tipo": "string",
+   "nulable": true
+  },
+  {
+   "nombre": "entidad",
+   "tipo": "string",
+   "nulable": true
+  },
+  {
+   "nombre": "es_mpt",
+   "tipo": "boolean",
+   "nulable": true
+  },
+  {
+   "nombre": "ruc_proveedor",
+   "tipo": "string",
+   "nulable": true
+  },
+  {
+   "nombre": "proveedor",
+   "tipo": "string",
+   "nulable": true
+  },
+  {
+   "nombre": "tipo_persona_proveedor",
+   "tipo": "string",
+   "nulable": false
+  },
+  {
+   "nombre": "tipo_procedimiento",
+   "tipo": "string",
+   "nulable": true
+  },
+  {
+   "nombre": "acuerdo_marco",
+   "tipo": "string",
+   "nulable": true
+  },
+  {
+   "nombre": "codigo_acuerdo_marco",
+   "tipo": "string",
+   "nulable": true
+  },
+  {
+   "nombre": "acuerdo_marco_original",
+   "tipo": "string",
+   "nulable": true
+  },
+  {
+   "nombre": "estado_orden",
+   "tipo": "string",
+   "nulable": true
+  },
+  {
+   "nombre": "descripcion_estado",
+   "tipo": "string",
+   "nulable": true
+  },
+  {
+   "nombre": "flag_estado_adverso",
+   "tipo": "boolean",
+   "nulable": true
+  },
+  {
+   "nombre": "flag_pagada",
+   "tipo": "boolean",
+   "nulable": true
+  },
+  {
+   "nombre": "flag_documento_estado",
+   "tipo": "boolean",
+   "nulable": false
+  },
+  {
+   "nombre": "sub_total",
+   "tipo": "decimal(18,2)",
+   "nulable": true
+  },
+  {
+   "nombre": "igv",
+   "tipo": "decimal(18,2)",
+   "nulable": true
+  },
+  {
+   "nombre": "total",
+   "tipo": "decimal(18,2)",
+   "nulable": true
+  },
+  {
+   "nombre": "total_double",
+   "tipo": "double",
+   "nulable": true
+  },
+  {
+   "nombre": "log10_total",
+   "tipo": "double",
+   "nulable": true
+  },
+  {
+   "nombre": "tasa_igv",
+   "tipo": "double",
+   "nulable": true
+  },
+  {
+   "nombre": "flag_igv_cero",
+   "tipo": "boolean",
+   "nulable": true
+  },
+  {
+   "nombre": "dias_formalizacion_a_ultimo_estado",
+   "tipo": "int",
+   "nulable": true
+  },
+  {
+   "nombre": "dias_observacion_hasta_corte",
+   "tipo": "int",
+   "nulable": true
+  },
+  {
+   "nombre": "dia_semana",
+   "tipo": "int",
+   "nulable": true
+  },
+  {
+   "nombre": "dia_mes",
+   "tipo": "int",
+   "nulable": true
+  },
+  {
+   "nombre": "url_orden_generada",
+   "tipo": "string",
+   "nulable": true
+  },
+  {
+   "nombre": "url_orden_digitalizada",
+   "tipo": "string",
+   "nulable": true
+  },
+  {
+   "nombre": "url_documento_estado",
+   "tipo": "string",
+   "nulable": true
+  },
+  {
+   "nombre": "alertas_calidad",
+   "tipo": "array<string>",
+   "nulable": false
+  },
+  {
+   "nombre": "archivo_origen",
+   "tipo": "string",
+   "nulable": false
+  },
+  {
+   "nombre": "periodo_archivo",
+   "tipo": "string",
+   "nulable": false
+  },
+  {
+   "nombre": "anio",
+   "tipo": "int",
+   "nulable": true
+  },
+  {
+   "nombre": "mes",
+   "tipo": "int",
+   "nulable": true
+  }
+ ]
+}

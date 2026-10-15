@@ -1,0 +1,13 @@
+{
+ "ordenes_nacional": 511782,
+ "ordenes_mpt": 1231,
+ "registros_persona_natural": 77735,
+ "ruc_pn_distintos": 865,
+ "seudonimos_distintos": 865,
+ "colisiones": 0,
+ "pn_en_claro": 0,
+ "items_orden_mpt": 5361,
+ "ordenes_mpt_integradas": 1231,
+ "resoluciones_mpt_resumen": 5,
+ "segundos": 6.89
+}

@@ -1,0 +1,22 @@
+# Versiones fijadas para que cualquier integrante reproduzca el entorno exacto.
+# PySpark 3.5.x: línea estable compatible con Java 17 y con el cliente Hadoop 3.3
+# que traen las imágenes habituales de HDFS/YARN del curso.
+pyspark==3.5.8
+# PyArrow/pandas/numpy fijados en una combinación probada con Spark 3.5
+# (numpy 2.x y pyarrow muy recientes rompen algunas conversiones de Spark 3.5).
+pyarrow==17.0.0
+pandas==2.2.3
+numpy==1.26.4
+# Ingesta HTTP y configuración
+requests==2.32.3
+PyYAML==6.0.2
+python-dotenv==1.0.1
+# Extracción de texto de PDF (Fuente 2). pytesseract solo si los PDF son imágenes.
+pdfplumber==0.11.4
+# Medición de memoria en la prueba de escalabilidad (3.7)
+psutil==6.1.0
+pytesseract==0.3.13
+# PySpark 3.5 importa distutils (eliminado en Python 3.12); setuptools lo provee.
+setuptools==75.6.0
+# Gráficos del informe (scripts/figuras_informe.py)
+matplotlib==3.9.2

@@ -1,0 +1,18 @@
+regla,severidad,descripcion,registros_evaluados,incumplen,pct_incumplen,resultado
+R01_registro_bien_formado,rechazo,La fila tiene exactamente las 19 columnas del diccionario (no es un registro corrupto),511782,0,0.0,OK
+R02_orden_presente,rechazo,El identificador de la orden (ORDEN_ELECTRÓNICA) no está vacío,511782,0,0.0,OK
+R03_orden_unica,rechazo,"Cada orden aparece una sola vez (si se repite, se conserva la del corte más reciente)",511782,0,0.0,OK
+R04_ruc_entidad_valido,rechazo,RUC de la entidad con 11 dígitos,511782,0,0.0,OK
+R05_ruc_proveedor_valido,rechazo,RUC del proveedor con 11 dígitos,511782,0,0.0,OK
+R06_fecha_formalizacion_valida,rechazo,FECHA_FORMALIZACIÓN se pudo convertir a fecha en alguno de los formatos conocidos,511782,0,0.0,OK
+R07_montos_numericos,rechazo,"SUB_TOTAL, IGV y TOTAL son numéricos",511782,0,0.0,OK
+R08_total_positivo,rechazo,TOTAL > 0 (una orden formalizada sin monto no es analizable),511782,0,0.0,OK
+R09_total_cuadra,rechazo,TOTAL = SUB_TOTAL + IGV con tolerancia de 5 céntimos (redondeo),511782,0,0.0,OK
+R10_tipo_procedimiento_dominio,rechazo,TIPO_PROCEDIMIENTO pertenece al dominio del diccionario (Compra Ordinaria / Gran Compra),511782,0,0.0,OK
+R11_acuerdo_marco_presente,rechazo,ACUERDO_MARCO no está vacío (es la categoría de comparación del modelo),511782,0,0.0,OK
+A01_estado_dominio,advertencia,El estado pertenece a los valores observados en 2022-2026,511782,0,0.0,OK
+A02_tasa_igv_coherente,advertencia,IGV es 0 (exonerado) o 18 % del SUB_TOTAL (±0.5 pp),511782,394,0.077,MARCADOS
+A03_total_minimo,advertencia,TOTAL de al menos S/ 1.00 (montos menores sugieren error de digitación),511782,11,0.0021,MARCADOS
+A04_ultimo_estado_posterior,advertencia,FECHA_ÚLTIMO_ESTADO no es anterior a FECHA_FORMALIZACIÓN,511782,0,0.0,OK
+A05_estado_antes_del_corte,advertencia,FECHA_ÚLTIMO_ESTADO no es posterior a la fecha de corte del archivo (FECHA_PROCESO),511782,0,0.0,OK
+A06_mes_coincide_archivo,advertencia,El mes de formalización coincide con el mes del archivo publicado,511782,0,0.0,OK

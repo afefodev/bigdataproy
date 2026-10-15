@@ -1,0 +1,31 @@
+etapa,campo,registros,no_nulos,pct_completitud
+entrada (tras normalizar),orden_electronica,511782,511782,100.0
+entrada (tras normalizar),ruc_entidad,511782,511782,100.0
+entrada (tras normalizar),entidad,511782,511782,100.0
+entrada (tras normalizar),ruc_proveedor,511782,511782,100.0
+entrada (tras normalizar),proveedor,511782,511782,100.0
+entrada (tras normalizar),tipo_procedimiento,511782,511782,100.0
+entrada (tras normalizar),acuerdo_marco,511782,511782,100.0
+entrada (tras normalizar),estado_orden,511782,511782,100.0
+entrada (tras normalizar),fecha_formalizacion,511782,511782,100.0
+entrada (tras normalizar),fecha_ultimo_estado,511782,511782,100.0
+entrada (tras normalizar),sub_total,511782,511782,100.0
+entrada (tras normalizar),igv,511782,511782,100.0
+entrada (tras normalizar),total,511782,511782,100.0
+entrada (tras normalizar),url_orden_generada,511782,511782,100.0
+entrada (tras normalizar),url_orden_digitalizada,511782,511782,100.0
+salida (processed),orden_electronica,511782,511782,100.0
+salida (processed),ruc_entidad,511782,511782,100.0
+salida (processed),entidad,511782,511782,100.0
+salida (processed),ruc_proveedor,511782,511782,100.0
+salida (processed),proveedor,511782,511782,100.0
+salida (processed),tipo_procedimiento,511782,511782,100.0
+salida (processed),acuerdo_marco,511782,511782,100.0
+salida (processed),estado_orden,511782,511782,100.0
+salida (processed),fecha_formalizacion,511782,511782,100.0
+salida (processed),fecha_ultimo_estado,511782,511782,100.0
+salida (processed),sub_total,511782,511782,100.0
+salida (processed),igv,511782,511782,100.0
+salida (processed),total,511782,511782,100.0
+salida (processed),url_orden_generada,511782,511782,100.0
+salida (processed),url_orden_digitalizada,511782,511782,100.0

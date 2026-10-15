@@ -1,0 +1,6 @@
+cruce,ordenes_mpt,cruzan,no_cruzan,detalle
+1. CSV ⟷ PDF de la orden (orden_electronica),1231,1231,0,PDF extraído OK: 1231; TOTAL CSV = PDF: 1231; fecha CSV = PDF: 1231
+2. Órdenes ⟷ resoluciones (±30 días),1231,192,1039,5 resoluciones de abastecimiento 2022-2026 en gob.pe; todas sobre bajas de bienes
+3. Órdenes ⟷ resoluciones (±30 días y misma familia),1231,63,1168,familia = acuerdo marco de la orden mencionado en el texto OCR de la resolución
+Clave alternativa: expediente,1231,0,1231,expedientes citados en resoluciones (mesa de partes): 4; expedientes SIAF en PDF: 1167; numeraciones distintas
+Clave alternativa: código OCAM citado en la resolución,1231,0,1231,resoluciones que citan algún OCAM: 0
